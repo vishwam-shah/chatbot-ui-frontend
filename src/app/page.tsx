@@ -56,13 +56,13 @@ export default function Page() {
 
   // Send user message to API and stream response
   const handleSend = async (message: Message) => {
-    // Always set user role
     const userMessage: Message = { ...message, role: "user" as const };
     const updatedMessages: Message[] = [...messages, userMessage];
     setMessages(updatedMessages);
     setLoading(true);
 
-    const response = await fetch("/api/chat", {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+    const response = await fetch(`${backendUrl}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: updatedMessages }),
@@ -73,38 +73,12 @@ export default function Page() {
       throw new Error(response.statusText);
     }
 
-    const data = response.body;
-    if (!data) return;
-
+    const data = await response.json();
+    setMessages((messages) => [
+      ...messages,
+      { role: "assistant", content: data.content },
+    ]);
     setLoading(false);
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let isFirst = true;
-
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-
-      // Remove 'assistant:' prefix if present
-      const cleanContent = chunkValue.replace(/^assistant:\s*/i, "");
-      if (isFirst) {
-        isFirst = false;
-        setMessages((messages) => [
-          ...messages,
-          { role: "assistant", content: cleanContent },
-        ]);
-      } else {
-        setMessages((messages) => {
-          const lastMessage = messages[messages.length - 1];
-          return [
-            ...messages.slice(0, -1),
-            { ...lastMessage, content: lastMessage.content + cleanContent },
-          ];
-        });
-      }
-    }
   };
 
   // Reset chat to initial assistant message
