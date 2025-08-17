@@ -56,7 +56,9 @@ export default function Page() {
 
   // Send user message to API and stream response
   const handleSend = async (message: Message) => {
-    const updatedMessages = [...messages, message];
+    // Always set user role
+    const userMessage: Message = { ...message, role: "user" as const };
+    const updatedMessages: Message[] = [...messages, userMessage];
     setMessages(updatedMessages);
     setLoading(true);
 
@@ -85,18 +87,20 @@ export default function Page() {
       done = doneReading;
       const chunkValue = decoder.decode(value);
 
+      // Remove 'assistant:' prefix if present
+      const cleanContent = chunkValue.replace(/^assistant:\s*/i, "");
       if (isFirst) {
         isFirst = false;
         setMessages((messages) => [
           ...messages,
-          { role: "assistant", content: chunkValue },
+          { role: "assistant", content: cleanContent },
         ]);
       } else {
         setMessages((messages) => {
           const lastMessage = messages[messages.length - 1];
           return [
             ...messages.slice(0, -1),
-            { ...lastMessage, content: lastMessage.content + chunkValue },
+            { ...lastMessage, content: lastMessage.content + cleanContent },
           ];
         });
       }
