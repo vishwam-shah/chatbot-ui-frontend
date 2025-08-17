@@ -4,6 +4,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 export default function LoginPage() {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
   const [mode, setMode] = useState<'login' | 'signup'>('signup');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +23,7 @@ export default function LoginPage() {
     setError("");
     setSuccess("");
     try {
-  const res = await axios.post("http://localhost:4000/api/login", { email, password });
+  const res = await axios.post(`${BACKEND_URL}/api/login`, { email, password });
       if (res.data.success && res.data.token) {
         storeToken(res.data.token);
         window.location.href = "/";
@@ -46,7 +47,8 @@ export default function LoginPage() {
     setError("");
     setSuccess("");
     try {
-  const res = await axios.post("http://localhost:4000/api/signup", { email, password });
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+  const res = await axios.post(`${BACKEND_URL}/api/signup`, { email, password });
       if (res.data.success && res.data.token) {
         storeToken(res.data.token);
         window.location.href = "/";
