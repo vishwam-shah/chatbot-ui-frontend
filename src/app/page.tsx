@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Layout/Navbar";
 import { Message } from "@/types";
 import { useEffect, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import Link from "next/link";
 
 export default function Page() {
   // Check JWT expiration and redirect to login if expired
@@ -126,6 +127,11 @@ export default function Page() {
           />
           <div ref={messagesEndRef} />
         </section>
+        <div className="mt-10 rounded-3xl">
+          <Link href="/dashboard" className="w-full py-2 px-4 bg-blue-500 text-white rounded-3xl">
+            Dashboard
+          </Link>
+        </div>
       </main>
       <Footer />
     </>
